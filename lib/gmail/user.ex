@@ -408,7 +408,7 @@ defmodule Gmail.User do
   """
   @spec start_mail(String.t(), String.t()) :: {atom, pid} | {atom, map}
   def start_mail(user_id, refresh_token) do
-    case Supervisor.start_child(Gmail.UserManager, [{user_id, refresh_token}]) do
+    case DynamicSupervisor.start_child(Gmail.UserManager, {Gmail.User, {user_id, refresh_token}}) do
       {:ok, pid} ->
         {:ok, pid}
 
