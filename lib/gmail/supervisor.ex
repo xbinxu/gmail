@@ -13,7 +13,7 @@ defmodule Gmail.Supervisor do
   @doc false
   def init(:ok) do
     children = [
-      {DynamicSupervisor, strategy: :one_for_one, name: Gmail.UserManager}
+      {DynamicSupervisor, strategy: :one_for_one, name: Gmail.UserManager},
       {Gmail.Thread.Pool, []},
       {Gmail.Message.Pool, []}
     ]
