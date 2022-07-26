@@ -10,6 +10,16 @@ defmodule Gmail.Thread.Pool do
   @default_pool_size 20
 
   @doc false
+  def child_spec(_) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, []},
+      restart: :permanent,
+      shutdown: 500
+    }
+  end
+
+  @doc false
   def start_link do
     poolboy_config = [
       {:name, {:local, :thread_pool}},
