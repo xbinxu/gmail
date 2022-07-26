@@ -1,5 +1,4 @@
 defmodule Gmail.Supervisor do
-
   @moduledoc """
   Supervises all the things.
   """
@@ -14,11 +13,11 @@ defmodule Gmail.Supervisor do
   @doc false
   def init(:ok) do
     children = [
-      supervisor(Gmail.UserManager, []),
-      supervisor(Gmail.Thread.Pool, []),
-      supervisor(Gmail.Message.Pool, [])
+      {Gmail.UserManager, []},
+      {Gmail.Thread.Pool, []},
+      {Gmail.Message.Pool, []}
     ]
-    supervise(children, strategy: :one_for_one)
-  end
 
+    Supervisor.init(children, strategy: :one_for_one)
+  end
 end

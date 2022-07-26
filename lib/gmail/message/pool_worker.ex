@@ -1,5 +1,4 @@
 defmodule Gmail.Message.PoolWorker do
-
   @moduledoc """
   A message pool worker.
   """
@@ -23,16 +22,16 @@ defmodule Gmail.Message.PoolWorker do
       user_id
       |> Message.get(message_id, params)
       |> User.http_execute(state)
-      |> Message.handle_message_response
+      |> Message.handle_message_response()
+
     {:reply, result, worker_state}
   end
 
   @doc """
   Gets a message.
   """
-  @spec get(pid, String.t, String.t, map, map) :: {atom, map}
+  @spec get(pid, String.t(), String.t(), map, map) :: {atom, map}
   def get(pid, user_id, message_id, params, state) do
     GenServer.call(pid, {:get, user_id, message_id, params, state}, :infinity)
   end
-
 end

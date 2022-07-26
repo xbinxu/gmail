@@ -1,4 +1,4 @@
-ExUnit.start
+ExUnit.start()
 
 defmodule Gmail.UtilsTest do
   use ExUnit.Case
@@ -15,6 +15,4 @@ defmodule Gmail.UtilsTest do
   test "load non existent config with a default" do
     assert 102 == Utils.load_config(:absent, :pool_size, 102)
   end
-
 end
-

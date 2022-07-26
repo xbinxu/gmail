@@ -1,5 +1,4 @@
 defmodule Gmail.UserManager do
-
   @moduledoc """
   Supervises user processes.
   """
@@ -13,8 +12,7 @@ defmodule Gmail.UserManager do
 
   @doc false
   def init(:ok) do
-    [worker(Gmail.User, [], restart: :transient)]
-    |> supervise(strategy: :simple_one_for_one)
+    [Gmail.User]
+    |> Supervisor.init(strategy: :simple_one_for_one)
   end
-
 end

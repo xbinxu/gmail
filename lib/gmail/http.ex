@@ -1,5 +1,4 @@
 defmodule Gmail.HTTP do
-
   @moduledoc """
   HTTP request handling.
   """
@@ -12,8 +11,8 @@ defmodule Gmail.HTTP do
   @doc """
   Executes an HTTP action based on the command provided.
   """
-  @spec execute({atom, String.t, String.t}, map) :: {atom, map} | {atom, String.t}
-  @spec execute({atom, String.t, String.t, map}, map) :: {atom, map} | {atom, String.t}
+  @spec execute({atom, String.t(), String.t()}, map) :: {atom, map} | {atom, String.t()}
+  @spec execute({atom, String.t(), String.t(), map}, map) :: {atom, map} | {atom, String.t()}
 
   def execute({:get, url, path}, %{access_token: access_token}) do
     (url <> path)
@@ -23,6 +22,7 @@ defmodule Gmail.HTTP do
 
   def execute({:post, url, path, data}, %{access_token: access_token}) do
     {:ok, json} = encode(data)
+
     (url <> path)
     |> HTTPoison.post(json, get_headers(access_token), timeout: :infinity, recv_timeout: :infinity)
     |> do_parse_response
@@ -42,6 +42,7 @@ defmodule Gmail.HTTP do
 
   def execute({:put, url, path, data}, %{access_token: access_token}) do
     {:ok, json} = encode(data)
+
     (url <> path)
     |> HTTPoison.put(json, get_headers(access_token), timeout: :infinity, recv_timeout: :infinity)
     |> do_parse_response
@@ -49,8 +50,12 @@ defmodule Gmail.HTTP do
 
   def execute({:patch, url, path, data}, %{access_token: access_token}) do
     {:ok, json} = encode(data)
+
     (url <> path)
-    |> HTTPoison.patch(json, get_headers(access_token), timeout: :infinity, recv_timeout: :infinity)
+    |> HTTPoison.patch(json, get_headers(access_token),
+      timeout: :infinity,
+      recv_timeout: :infinity
+    )
     |> do_parse_response
   end
 
@@ -58,7 +63,7 @@ defmodule Gmail.HTTP do
 
   #  Private functions {{{ #
 
-  @spec do_parse_response({atom, Response.t}) :: {atom, map} | {atom, String.t}
+  @spec do_parse_response({atom, Response.t()}) :: {atom, map} | {atom, String.t()}
   defp do_parse_response({:ok, %Response{body: body}}) when byte_size(body) > 0 do
     decode(body)
   end
@@ -71,7 +76,7 @@ defmodule Gmail.HTTP do
     {:error, reason}
   end
 
-  @spec get_headers(String.t) :: [{String.t, String.t}]
+  @spec get_headers(String.t()) :: [{String.t(), String.t()}]
   defp get_headers(token) do
     [
       {"Authorization", "Bearer #{token}"},
@@ -80,5 +85,4 @@ defmodule Gmail.HTTP do
   end
 
   #  }}} Private functions #
-
 end

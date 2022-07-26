@@ -1,5 +1,4 @@
 defmodule Gmail.Payload do
-
   @moduledoc """
   Utils functions for dealing with email payloads.
   """
@@ -8,26 +7,28 @@ defmodule Gmail.Payload do
   alias Gmail.{Body, Utils}
 
   defstruct part_id: "",
-    mime_type: "",
-    filename: "",
-    headers: [],
-    body: %Body{},
-    parts: []
+            mime_type: "",
+            filename: "",
+            headers: [],
+            body: %Body{},
+            parts: []
 
   @type t :: %__MODULE__{}
 
   @doc """
   Converts an email payload.
   """
-  @spec convert(map) :: Payload.t
+  @spec convert(map) :: Payload.t()
   def convert(result) do
     {body, payload} =
       result
-      |> Utils.atomise_keys
+      |> Utils.atomise_keys()
       |> Map.pop(:body)
+
     {parts, payload} = Map.pop(payload, :parts)
     payload = struct(Payload, payload)
     payload = if body, do: Map.put(payload, :body, Body.convert(body)), else: payload
+
     if parts do
       parts = Enum.map(parts, &convert/1)
       Map.put(payload, :parts, parts)
@@ -35,5 +36,4 @@ defmodule Gmail.Payload do
       payload
     end
   end
-
 end

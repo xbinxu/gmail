@@ -1,6 +1,5 @@
 defmodule Gmail.Label do
-
-  @moduledoc"""
+  @moduledoc """
   Labels are used to categorize messages and threads within the user's mailbox.
   """
 
@@ -11,14 +10,14 @@ defmodule Gmail.Label do
   > Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/labels#resource
   """
   defstruct id: nil,
-    name: nil,
-    message_list_visibility: nil,
-    label_list_visibility: nil,
-    type: nil,
-    messages_total: nil,
-    messages_unread: nil,
-    threads_total: nil,
-    threads_unread: nil
+            name: nil,
+            message_list_visibility: nil,
+            label_list_visibility: nil,
+            type: nil,
+            messages_total: nil,
+            messages_unread: nil,
+            threads_total: nil,
+            threads_unread: nil
 
   @type t :: %__MODULE__{}
 
@@ -27,7 +26,7 @@ defmodule Gmail.Label do
 
   > Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/labels/create
   """
-  @spec create(String.t, String.t) :: {atom, String.t, String.t, map}
+  @spec create(String.t(), String.t()) :: {atom, String.t(), String.t(), map}
   def create(user_id, label_name) do
     {:post, base_url(), "users/#{user_id}/labels", %{"name" => label_name}}
   end
@@ -37,7 +36,7 @@ defmodule Gmail.Label do
 
   Google API Documentation: https://developers.google.com/gmail/api/v1/reference/users/labels/update
   """
-  @spec update(String.t, Label.t) :: {atom, String.t, String.t, map}
+  @spec update(String.t(), Label.t()) :: {atom, String.t(), String.t(), map}
   def update(user_id, %Label{id: id} = label) do
     {:put, base_url(), "users/#{user_id}/labels/#{id}", convert_for_update(label)}
   end
@@ -47,7 +46,7 @@ defmodule Gmail.Label do
 
   Google API Documentation: https://developers.google.com/gmail/api/v1/reference/users/labels/patch
   """
-  @spec patch(String.t, Label.t) :: {atom, String.t, String.t, map}
+  @spec patch(String.t(), Label.t()) :: {atom, String.t(), String.t(), map}
   def patch(user_id, %Label{id: id} = label) do
     {:patch, base_url(), "users/#{user_id}/labels/#{id}", convert_for_patch(label)}
   end
@@ -57,7 +56,7 @@ defmodule Gmail.Label do
 
   Google API Documentation: https://developers.google.com/gmail/api/v1/reference/users/labels/delete
   """
-  @spec delete(String.t, String.t) :: {atom, String.t, String.t}
+  @spec delete(String.t(), String.t()) :: {atom, String.t(), String.t()}
   def delete(user_id, label_id) do
     {:delete, base_url(), "users/#{user_id}/labels/#{label_id}"}
   end
@@ -67,7 +66,7 @@ defmodule Gmail.Label do
 
   > Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/labels/get
   """
-  @spec get(String.t, String.t) :: {atom, String.t, String.t}
+  @spec get(String.t(), String.t()) :: {atom, String.t(), String.t()}
   def get(user_id, label_id) do
     {:get, base_url(), "users/#{user_id}/labels/#{label_id}"}
   end
@@ -77,7 +76,7 @@ defmodule Gmail.Label do
 
   > Gmail API Documentation: https://developers.google.com/gmail/api/v1/reference/users/labels/list
   """
-  @spec list(String.t) :: {atom, String.t, String.t}
+  @spec list(String.t()) :: {atom, String.t(), String.t()}
   def list(user_id) do
     {:get, base_url(), "users/#{user_id}/labels"}
   end
@@ -85,26 +84,28 @@ defmodule Gmail.Label do
   @doc """
   Converts a Gmail API label resource into a local struct.
   """
-  @spec convert(map) :: Label.t
+  @spec convert(map) :: Label.t()
   def convert(result) do
-    Enum.reduce(result, %Label{}, fn({key, value}, label) ->
-      %{label | (key |> Macro.underscore |> String.to_atom) => value}
+    Enum.reduce(result, %Label{}, fn {key, value}, label ->
+      %{label | (key |> Macro.underscore() |> String.to_atom()) => value}
     end)
   end
 
   @doc """
   Handles a label resource response from the Gmail API.
   """
-  @spec handle_label_response({atom, map}) :: {atom, String.t} | {atom, map}
-  @spec handle_label_response({atom, String.t}) :: {atom, String.t} | {atom, map}
+  @spec handle_label_response({atom, map}) :: {atom, String.t()} | {atom, map}
+  @spec handle_label_response({atom, String.t()}) :: {atom, String.t()} | {atom, map}
   def handle_label_response(response) do
     response
     |> handle_error
     |> case do
       {:error, message} ->
         {:error, message}
+
       {:ok, %{"error" => details}} ->
         {:error, details}
+
       {:ok, raw_label} ->
         {:ok, convert(raw_label)}
     end
@@ -113,13 +114,14 @@ defmodule Gmail.Label do
   @doc """
   Handles a label list response from the Gmail API.
   """
-  @spec handle_label_list_response(atom | {atom, map | String.t}) :: {atom, String.t | map}
+  @spec handle_label_list_response(atom | {atom, map | String.t()}) :: {atom, String.t() | map}
   def handle_label_list_response(response) do
     response
     |> handle_error
     |> case do
       {:error, message} ->
         {:error, message}
+
       {:ok, %{"labels" => raw_labels}} ->
         {:ok, Enum.map(raw_labels, &convert/1)}
     end
@@ -128,23 +130,27 @@ defmodule Gmail.Label do
   @doc """
   Handles a label delete response from the Gmail API.
   """
-  @spec handle_label_delete_response(atom | {atom, map | String.t}) :: {atom, String.t} | {atom, map} | atom
+  @spec handle_label_delete_response(atom | {atom, map | String.t()}) ::
+          {atom, String.t()} | {atom, map} | atom
   def handle_label_delete_response(response) do
     response
     |> handle_error
     |> case do
       {:error, message} ->
         {:error, message}
+
       {:ok, _} ->
         :ok
     end
   end
 
-  @spec convert_for_patch(Label.t) :: map
+  @spec convert_for_patch(Label.t()) :: map
   defp convert_for_patch(label) do
-    label |> Map.from_struct |> Enum.reduce(%{}, fn({key, value}, map) ->
+    label
+    |> Map.from_struct()
+    |> Enum.reduce(%{}, fn {key, value}, map ->
       if value do
-        {first_letter, rest} = key |> Atom.to_string |> Macro.camelize |> String.split_at(1)
+        {first_letter, rest} = key |> Atom.to_string() |> Macro.camelize() |> String.split_at(1)
         Map.put(map, String.downcase(first_letter) <> rest, value)
       else
         map
@@ -152,13 +158,13 @@ defmodule Gmail.Label do
     end)
   end
 
-  @spec convert_for_update(Label.t) :: map
+  @spec convert_for_update(Label.t()) :: map
   defp convert_for_update(%Label{
-    id: id,
-    name: name,
-    label_list_visibility: label_list_visibility,
-    message_list_visibility: message_list_visibility
-  }) do
+         id: id,
+         name: name,
+         label_list_visibility: label_list_visibility,
+         message_list_visibility: message_list_visibility
+       }) do
     %{
       "id" => id,
       "name" => name,
@@ -166,5 +172,4 @@ defmodule Gmail.Label do
       "messageListVisibility" => message_list_visibility
     }
   end
-
 end

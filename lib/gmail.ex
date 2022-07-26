@@ -1,5 +1,4 @@
 defmodule Gmail do
-
   @moduledoc """
   A simple Gmail REST API client for Elixir.
 
@@ -60,11 +59,10 @@ defmodule Gmail do
   # defdelegate search(query), to: Thread
 
   def start(_type, _args) do
-    Gmail.Supervisor.start_link
+    Gmail.Supervisor.start_link()
   end
 
   def stop(_args) do
     # noop
   end
-
 end

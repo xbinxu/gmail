@@ -1,5 +1,4 @@
 defmodule Gmail.Message.Pool do
-
   @moduledoc """
   A pool of workers for handling message operations.
   """
@@ -34,19 +33,19 @@ defmodule Gmail.Message.Pool do
   @doc """
   Gets a message.
   """
-  @spec get(String.t, String.t, map, map) :: {atom, map}
+  @spec get(String.t(), String.t(), map, map) :: {atom, map}
   def get(user_id, message_id, params, state) do
     :poolboy.transaction(
       :__gmail_message_pool,
       fn pid ->
         PoolWorker.get(pid, user_id, message_id, params, state)
       end,
-      :infinity)
+      :infinity
+    )
   end
 
   @spec pool_size() :: integer
   defp pool_size do
     Utils.load_config(:message, :pool_size, @default_pool_size)
   end
-
 end

@@ -1,5 +1,4 @@
 defmodule Gmail.Utils do
-
   @moduledoc """
   General helper functions.
   """
@@ -23,8 +22,9 @@ defmodule Gmail.Utils do
   def atomise_key({key, val}, map) when is_binary(key) do
     key =
       key
-      |> Macro.underscore
-      |> String.to_atom
+      |> Macro.underscore()
+      |> String.to_atom()
+
     atomise_key({key, val}, map)
   end
 
@@ -36,12 +36,12 @@ defmodule Gmail.Utils do
   Camelizes a string (with the first letter in lower case)
   """
   def camelize(str) when is_atom(str) do
-    str |> Atom.to_string |> camelize
+    str |> Atom.to_string() |> camelize
   end
 
   def camelize(str) do
-    [first|rest] = str |> Macro.camelize |> String.codepoints
-    [String.downcase(first)|rest] |> Enum.join
+    [first | rest] = str |> Macro.camelize() |> String.codepoints()
+    [String.downcase(first) | rest] |> Enum.join()
   end
 
   @doc """
@@ -63,5 +63,4 @@ defmodule Gmail.Utils do
   def load_config(subject) do
     Application.get_env(:gmail, subject, [])
   end
-
 end

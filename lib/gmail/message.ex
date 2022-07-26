@@ -1,5 +1,4 @@
 defmodule Gmail.Message do
-
   @moduledoc """
   An email message.
   """
@@ -12,13 +11,13 @@ defmodule Gmail.Message do
   Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/messages#resource
   """
   defstruct id: "",
-    thread_id: "",
-    label_ids: [],
-    snippet: "",
-    history_id: nil,
-    payload: %Gmail.Payload{},
-    size_estimate: nil,
-    raw: ""
+            thread_id: "",
+            label_ids: [],
+            snippet: "",
+            history_id: nil,
+            payload: %Gmail.Payload{},
+            size_estimate: nil,
+            raw: ""
 
   @type t :: %__MODULE__{}
 
@@ -27,7 +26,7 @@ defmodule Gmail.Message do
 
   Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/messages/get
   """
-  @spec get(String.t, String.t, map) :: {atom, String.t, String.t}
+  @spec get(String.t(), String.t(), map) :: {atom, String.t(), String.t()}
   def get(user_id, message_id, params) do
     available_options = [:format, :metadata_headers]
     path = querify_params("users/#{user_id}/messages/#{message_id}", available_options, params)
@@ -39,7 +38,7 @@ defmodule Gmail.Message do
 
   Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/messages/delete
   """
-  @spec delete(String.t, String.t) :: {atom, String.t, String.t}
+  @spec delete(String.t(), String.t()) :: {atom, String.t(), String.t()}
   def delete(user_id, message_id) do
     {:delete, base_url(), "users/#{user_id}/messages/#{message_id}"}
   end
@@ -49,7 +48,7 @@ defmodule Gmail.Message do
 
   Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/messages/trash
   """
-  @spec trash(String.t, String.t) :: {atom, String.t, String.t}
+  @spec trash(String.t(), String.t()) :: {atom, String.t(), String.t()}
   def trash(user_id, message_id) do
     {:post, base_url(), "users/#{user_id}/messages/#{message_id}/trash"}
   end
@@ -59,7 +58,7 @@ defmodule Gmail.Message do
 
   Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/messages/untrash
   """
-  @spec untrash(String.t, String.t) :: {atom, String.t, String.t}
+  @spec untrash(String.t(), String.t()) :: {atom, String.t(), String.t()}
   def untrash(user_id, message_id) do
     {:post, base_url(), "users/#{user_id}/messages/#{message_id}/untrash"}
   end
@@ -69,7 +68,7 @@ defmodule Gmail.Message do
 
   Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/messages/list
   """
-  @spec search(String.t, String.t, map) :: {atom, String.t, String.t}
+  @spec search(String.t(), String.t(), map) :: {atom, String.t(), String.t()}
   def search(user_id, query, params) when is_binary(query) do
     list(user_id, Map.put(params, :q, query))
   end
@@ -79,7 +78,7 @@ defmodule Gmail.Message do
 
   Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/messages/list
   """
-  @spec list(String.t, map) :: {atom, String.t, String.t}
+  @spec list(String.t(), map) :: {atom, String.t(), String.t()}
   def list(user_id, params) do
     available_options = [:max_results, :include_spam_trash, :label_ids, :page_token, :q]
     path = querify_params("users/#{user_id}/messages", available_options, params)
@@ -92,21 +91,23 @@ defmodule Gmail.Message do
   Gmail API documentation: https://developers.google.com/gmail/api/v1/reference/users/messages/modify#http-request
   """
   def modify(user_id, message_id, labels_to_add, labels_to_remove) do
-    {:post, base_url(), "users/#{user_id}/messages/#{message_id}/modify", %{
-        "addLabelIds" => labels_to_add,
-        "removeLabelIds" => labels_to_remove
-      }}
+    {:post, base_url(), "users/#{user_id}/messages/#{message_id}/modify",
+     %{
+       "addLabelIds" => labels_to_add,
+       "removeLabelIds" => labels_to_remove
+     }}
   end
 
   @doc """
   Converts a Gmail API message resource into a local struct.
   """
-  @spec convert(map) :: Message.t
+  @spec convert(map) :: Message.t()
   def convert(message) do
     {payload, message} =
       message
-      |> Utils.atomise_keys
+      |> Utils.atomise_keys()
       |> Map.pop(:payload)
+
     message = struct(Message, message)
     if payload, do: Map.put(message, :payload, Payload.convert(payload)), else: message
   end
@@ -120,6 +121,7 @@ defmodule Gmail.Message do
     |> case do
       {:error, message} ->
         {:error, message}
+
       {:ok, raw_message} ->
         {:ok, Message.convert(raw_message)}
     end
@@ -134,8 +136,13 @@ defmodule Gmail.Message do
     |> case do
       {:error, message} ->
         {:error, message}
+
       {:ok, %{"messages" => msgs}} ->
-        {:ok, Enum.map(msgs, fn(%{"id" => id, "threadId" => thread_id}) -> %Message{id: id, thread_id: thread_id} end)}
+        {:ok,
+         Enum.map(msgs, fn %{"id" => id, "threadId" => thread_id} ->
+           %Message{id: id, thread_id: thread_id}
+         end)}
+
       {:ok, %{"resultSizeEstimate" => 0}} ->
         {:ok, []}
     end
@@ -150,6 +157,7 @@ defmodule Gmail.Message do
     |> case do
       {:error, message} ->
         {:error, message}
+
       {:ok, _} ->
         :ok
     end
